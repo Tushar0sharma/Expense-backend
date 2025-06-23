@@ -22,6 +22,10 @@ const userSchema=new mongoose.Schema({
     verified:{
         type:Boolean,
         default:false
+    },
+    fcmToken:{
+        type:String,
+        default:null
     }
 },{timestamps:true});
 
