@@ -16,10 +16,10 @@ const serviceAccount = {
   universe_domain:process.env.UNIVERSE_DOMAIN
 };
 
-if (!admin.apps.length) {
+// if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
-}
+// }
 
 export {admin};
