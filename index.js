@@ -50,7 +50,7 @@ app.get("/verify/:token",async(req,res)=>{
 
 app.post('/api/save-fcm-token',async(req,res)=>{
     try{
-        const {userId,fcmToken}=req.bodyparser
+        const {userId,fcmToken}=req.body
         if(!userId || !fcmToken) return res.status(400).json({error:"Missing userid or fcmtoken"})
 
         const user=await User.findByIdAndUpdate(userId,{fcmToken},{new:true});
