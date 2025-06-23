@@ -9,6 +9,7 @@ const app=express();
 import { userrouter } from './routes/user.routes.js';
 import walletrouter from './routes/wallet.routes.js';
 import transactionrouter from './routes/Transaction.routes.js';
+import { pingrouter } from './routes/ping.routes.js';
 app.use(bodyparser.urlencoded({extended:false}))
 app.use(bodyparser.json())
 
@@ -26,6 +27,7 @@ app.use('/api/auth',authrouter)
 app.use('/api/user',userrouter)
 app.use('/api/wallet',walletrouter)
 app.use('/api/transaction',transactionrouter)
+app.use('/api',pingrouter)
 
 app.get("/verify/:token",async(req,res)=>{
     try{
