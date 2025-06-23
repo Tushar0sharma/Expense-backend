@@ -11,7 +11,6 @@ import { userrouter } from './routes/user.routes.js';
 import walletrouter from './routes/wallet.routes.js';
 import transactionrouter from './routes/Transaction.routes.js';
 import { pingrouter } from './routes/ping.routes.js';
-import { use } from 'react';
 import Transaction from './models/Transaction.models.js';
 import {admin} from './firebaseAdmin.js'
 app.use(bodyparser.urlencoded({extended:false}))
