@@ -107,7 +107,7 @@ app.post('/api/save-fcm-token', async (req, res) => {
           token: user.fcmToken,
           notification: {
             title: '🧾 Yesterday\'s Summary',
-            body: `You spent ₹${total} and earnt ₹${income} on ${start.toDateString()}`,
+            body: `You spent ₹${total} and earnt ₹${income} in last 24 Hrs`,
           },
           android: {
             notification: {
