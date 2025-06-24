@@ -78,18 +78,14 @@ app.post('/api/save-fcm-token', async (req, res) => {
     try{
       const users = await User.find({ fcmToken: { $ne: null } });
 
-        const now=new Date()
-        const start=new Date(now)
-        start.setDate(start.getDate()-1)
-        start.setHours(0,0,0,0)
+        const now = new Date();
+        const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Now - 24h
 
-        const end=new Date(start)
-        end.setHours(23,59,59,999)
 
         for (const user of users){
           const transaction=await Transaction.find({
             userId:user._id,
-            createdAt:{$gte:start,$lte:end},
+            createdAt:{$gte:last24Hours,$lte:now},
           })
         // }
 
