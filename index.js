@@ -84,22 +84,23 @@ app.post('/api/save-fcm-token', async (req, res) => {
 
         for (const user of users){
           const transaction=await Transaction.find({
-            userId:user._id,
+            uid:user._id,
             createdAt:{$gte:last24Hours,$lte:now},
           })
 
-        const total=transaction.reduce((sum,txn)=>
-          {
-            if(txn.type=='expense'){
-              sum+txn.amount
-            }
-          },0);
-          const income=transaction.reduce((sum,txn)=>
-            {
-              if(txn.type=='income'){
-                sum+txn.amount
-              }
-            },0);
+         const total = transaction.reduce((sum, txn) => {
+          if (txn.type === 'expense') {
+            return sum + txn.amount;
+          }
+          return sum;
+        }, 0);
+        
+        const income = transaction.reduce((sum, txn) => {
+          if (txn.type === 'income') {
+            return sum + txn.amount;
+          }
+          return sum;
+        }, 0);
           
             
         const message = {
