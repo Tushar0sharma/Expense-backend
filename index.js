@@ -87,11 +87,6 @@ app.post('/api/save-fcm-token', async (req, res) => {
             userId:user._id,
             createdAt:{$gte:last24Hours,$lte:now},
           })
-        // }
-            for(cosnt tx of transaction){
-                console.log(tx.type+" "+tx.amount);
-            }
-            console.log("no transaction found")
 
         const total=transaction.reduce((sum,txn)=>
           {
