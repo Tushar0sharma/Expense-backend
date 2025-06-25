@@ -129,4 +129,7 @@ app.post('/api/save-fcm-token', async (req, res) => {
       console.error('Error sending notification:', error);
       res.status(500).json({ error: 'Failed to send notification' });
     }
-  })
+  },{
+  scheduled: true,
+  timezone: "Asia/Kolkata"
+})
