@@ -11,13 +11,17 @@ export const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
+        const otp=Math.floor(100000+Math.random()*900000).toString();
+        const otpExpiry=Date.now()+5*60*1000;
         const existingUser = await User.findOne({ email });  
         if (existingUser) {
+            if(!existingUser.verified) {
+                sendverificationemail(existingUser.email,existingUser.otp);
+                res.status(200).json({ message: "Registration successful" });
+            }
             return res.status(400).json({ message: "User already exists" });
         }
 
-        const otp=Math.floor(100000+Math.random()*900000).toString();
-        const otpExpiry=Date.now()+5*60*1000;
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ name, email, password: hashedPassword,otp,otpExpiry,verified:false }); 
