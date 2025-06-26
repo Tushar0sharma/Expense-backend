@@ -26,7 +26,9 @@ const userSchema=new mongoose.Schema({
     fcmToken:{
         type:String,
         default:null
-    }
+    },
+    otp:String,
+    otpExpiry:Date
 },{timestamps:true});
 
 const User=mongoose.model("User",userSchema);
