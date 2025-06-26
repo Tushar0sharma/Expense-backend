@@ -72,10 +72,18 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: "User not found" });
         }
 
+        
+
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
+
+        
+        if(!user.verified){
+             return res.status(400).json({ message: "User not Verified" });
+        }
+        
 
         const token=jwt.sign({
             _id:user._id,
