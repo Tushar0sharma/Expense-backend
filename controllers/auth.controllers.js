@@ -16,14 +16,17 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: "User already exists" });
         }
 
+        const otp=Math.floor(100000+Math.random()*900000).toString();
+        const otpExpiry=Date.now()+5*60*1000;
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ name, email, password: hashedPassword }); 
+        const newUser = new User({ name, email, password: hashedPassword,otp,otpExpiry,verified:false }); 
 
         newUser.verificationToken=crypto.randomBytes(20).toString("hex");
 
         await newUser.save();
 
-        sendverificationemail(newUser.email,newUser.verificationToken);
+        sendverificationemail(newUser.email,newUser.otp);
 
         res.status(200).json({ message: "Registration successful" });
     } catch (error) {
@@ -32,7 +35,7 @@ export const register = async (req, res) => {
     }
 };
 
-const sendverificationemail=async(email,verificationToken)=>{
+const sendverificationemail=async(email,otp)=>{
     //create a nodemailer transporter
 
     const transporter=nodemailer.createTransport({
@@ -48,8 +51,8 @@ const sendverificationemail=async(email,verificationToken)=>{
     const mailoptions={
         from:"Expense.com",
         to:email,
-        subject:"Email Verification",
-        text:`Please check the following link to verify your email https://192.168.29.6:3000/verify/${verificationToken}`
+        subject:"Your Otp Code",
+        text:`Your OTP code is: ${otp}. It expires in 5 minutes.`
     }
 
     try{
@@ -90,4 +93,26 @@ export const login = async (req, res) => {
         console.error("Error in login function:", error);
         res.status(500).json({ message: "Internal server error" });
     }
+};
+
+export const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    user.verified = true;
+    user.otp = null;
+    user.otpExpiry = null;
+    await user.save();
+
+    res.status(200).json({ message: "Email verified successfully" });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
