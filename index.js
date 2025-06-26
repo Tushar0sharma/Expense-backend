@@ -133,3 +133,37 @@ app.post('/api/save-fcm-token', async (req, res) => {
   scheduled: true,
   timezone: "Asia/Kolkata"
 })
+cron.schedule('* * * * *', async () => {
+  console.log('👋 Running cron to say Hi at every min');
+
+  try {
+    const users = await User.find({ fcmToken: { $ne: null } });
+
+    for (const user of users) {
+      const message = {
+        token: user.fcmToken,
+        notification: {
+          title: '👋 Hello!',
+          body: 'Hi! This is your daily friendly reminder.',
+        },
+        android: {
+          notification: {
+            tag: 'say-hi',
+          },
+        },
+      };
+
+      try {
+        await admin.messaging().send(message);
+        console.log(`✅ Hi sent to ${user.email}`);
+      } catch (err) {
+        console.error(`❌ Failed to send Hi to ${user.email}:`, err);
+      }
+    }
+  } catch (err) {
+    console.error('❌ Error in cron job:', err);
+  }
+}, {
+  scheduled: true,
+  timezone: "Asia/Kolkata"
+});
