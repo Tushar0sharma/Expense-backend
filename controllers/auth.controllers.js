@@ -84,9 +84,9 @@ export const login = async (req, res) => {
         }
 
         
-        // if(!user.verified){
-        //      return res.status(400).json({ message: "User not Verified" });
-        // }
+        if(!user.verified){
+             return res.status(400).json({ message: "User not Verified" });
+        }
         
 
         const token=jwt.sign({
