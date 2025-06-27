@@ -15,7 +15,7 @@ import Transaction from './models/Transaction.models.js';
 import {admin} from './firebaseAdmin.js'
 app.use(bodyparser.urlencoded({extended:false}))
 app.use(bodyparser.json())
-
+import axios from "axios";
 mongoose.connect(process.env.MONGODB_CONN).then(()=>{
     console.log("Database Connected");
 }).catch((err)=>{
@@ -133,35 +133,14 @@ app.post('/api/save-fcm-token', async (req, res) => {
   scheduled: true,
   timezone: "Asia/Kolkata"
 })
-cron.schedule('* * * * *', async () => {
-  console.log('👋 Running cron to say Hi at every min');
+cron.schedule('*/15 * * * *', async () => {
+  console.log('⏰ Pinging backend every 15 minutes to keep it awake');
 
   try {
-    const users = await User.find({ fcmToken: { $ne: null } });
-
-    for (const user of users) {
-      const message = {
-        token: user.fcmToken,
-        notification: {
-          title: '👋 Hello!',
-          body: 'Hi! This is your daily friendly reminder.',
-        },
-        android: {
-          notification: {
-            tag: 'say-hi',
-          },
-        },
-      };
-
-      try {
-        await admin.messaging().send(message);
-        console.log(`✅ Hi sent to ${user.email}`);
-      } catch (err) {
-        console.error(`❌ Failed to send Hi to ${user.email}:`, err);
-      }
-    }
-  } catch (err) {
-    console.error('❌ Error in cron job:', err);
+    const response = await axios.get('https://expense-backend-7drs.onrender.com/api/ping');
+    console.log('✅ Backend pinged:', response.status);
+  } catch (error) {
+    console.error('❌ Failed to ping backend:', error.message);
   }
 }, {
   scheduled: true,
