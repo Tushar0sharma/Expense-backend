@@ -11,17 +11,13 @@ export const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        const otp=Math.floor(100000+Math.random()*900000).toString();
-        const otpExpiry=Date.now()+5*60*1000;
         const existingUser = await User.findOne({ email });  
         if (existingUser) {
-            if(!existingUser.verified) {
-                sendverificationemail(existingUser.email,existingUser.otp);
-                res.status(200).json({ message: "Registration successful" });
-            }
             return res.status(400).json({ message: "User already exists" });
         }
 
+        const otp=Math.floor(100000+Math.random()*900000).toString();
+        const otpExpiry=Date.now()+5*60*1000;
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ name, email, password: hashedPassword,otp,otpExpiry,verified:false }); 
@@ -38,6 +34,51 @@ export const register = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
+export const forgotpass=async(req,res)=>{
+    try {
+        const { email } = req.body;
+        
+        const existingUser = await User.findOne({ email });  
+        if (!existingUser) {
+            return res.status(400).json({ message: "User doesn't exist" });
+        }
+         const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = Date.now() + 5 * 60 * 1000;
+
+    existingUser.otp = otp;
+    existingUser.otpExpiry = otpExpiry;
+    await existingUser.save();
+
+        sendverificationemail(existingUser.email,existingUser.otp);
+
+        res.status(200).json({ message: "Otp sent Successful" });
+    } catch (error) {
+        console.error("Error in forgot pass function:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const setpass=async (req,res)=>{
+    try{
+        const {email,code,password}=req.body;
+
+        const user = await User.findOne({ email });
+        if (!user || user.otp !== code || user.otpExpiry < Date.now()) {
+        return res.status(400).json({ message: "Invalid or expired OTP" });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user.password=hashedPassword
+        await user.save()
+        res.status(200).json({ message: "Password saved Successful" });
+
+    }catch(error){
+       console.error("Error in forgot pass function:", error);
+        res.status(500).json({ message: "Internal server error" }); 
+    }
+}
+
+
 
 const sendverificationemail=async(email,otp)=>{
     //create a nodemailer transporter
@@ -75,19 +116,14 @@ export const login = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: "User not found" });
         }
-
-        
+        if(!user.verified){
+             return res.status(400).json({ message: "User not Verified" });
+        }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
-
-        
-        if(!user.verified){
-             return res.status(400).json({ message: "User not Verified" });
-        }
-        
 
         const token=jwt.sign({
             _id:user._id,
@@ -121,8 +157,12 @@ export const verifyOtp = async (req, res) => {
     user.otp = null;
     user.otpExpiry = null;
     await user.save();
+    const newUser=user.toObject({getters:true})
+        delete newUser.password
+        console.log(newUser);
+        
 
-    res.status(200).json({ message: "Email verified successfully" });
+    res.status(200).json({ message: "Email verified successfully" ,newUser});
   } catch (error) {
     console.error("Error verifying OTP:", error);
     res.status(500).json({ message: "Internal server error" });
