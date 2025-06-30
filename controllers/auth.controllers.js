@@ -12,12 +12,27 @@ export const register = async (req, res) => {
         const { name, email, password } = req.body;
 
         const existingUser = await User.findOne({ email });  
-        if (existingUser) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-
         const otp=Math.floor(100000+Math.random()*900000).toString();
         const otpExpiry=Date.now()+5*60*1000;
+        if (existingUser) {
+            if(existingUser.verified) return res.status(400).json({ message: "User already exists" });
+            else {
+                const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+                if (!isPasswordValid) {
+                    return res.status(400).json({ message: "Wrong Password" });
+                }
+                const isNameValid = name===existingUser.name;
+                if (!isNameValid) {
+                    return res.status(400).json({ message: "Wrong Name" });
+                }
+                existingUser.otp=otp;
+                existingUser.otpExpiry=otpExpiry;
+                await existingUser.save();
+                sendverificationemail(existingUser.email,existingUser.otp);
+                res.status(200).json({ message: "Otp Sent successful" });
+            }
+        }
+
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ name, email, password: hashedPassword,otp,otpExpiry,verified:false }); 
