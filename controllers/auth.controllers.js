@@ -29,7 +29,7 @@ export const register = async (req, res) => {
                 existingUser.otpExpiry=otpExpiry;
                 await existingUser.save();
                 sendverificationemail(existingUser.email,existingUser.otp);
-                res.status(200).json({ message: "Otp Sent successful" });
+                return res.status(200).json({ message: "Otp Sent successful" });
             }
         }
 
