@@ -35,8 +35,13 @@ export const register = async (req, res) => {
     await newUser.save();
 
     sendverificationemail(newUser.email, newUser.otp);
+     const user = await User.findOne({newUser.email});
+     const newUser1 = user.toObject({getters: true});
+    delete newUser1.password;
 
-    res.status(200).json({message: 'Registration successful'});
+    res.status(200).json({message: 'Registration successful', token, user: newUser1});
+
+    // res.status(200).json({message: 'Registration successful'});
   } catch (error) {
     console.error('Error in register function:', error);
     res.status(500).json({message: 'Internal server error'});
