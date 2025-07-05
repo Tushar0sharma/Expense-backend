@@ -35,7 +35,7 @@ export const register = async (req, res) => {
     await newUser.save();
 
     sendverificationemail(newUser.email, newUser.otp);
-     const user = await User.findOne({newUser.email});
+     const user = await User.findOne({email});
      const newUser1 = user.toObject({getters: true});
     delete newUser1.password;
 
