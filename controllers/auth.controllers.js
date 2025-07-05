@@ -39,7 +39,7 @@ export const register = async (req, res) => {
      const newUser1 = user.toObject({getters: true});
     delete newUser1.password;
 
-    res.status(200).json({message: 'Registration successful', token, user: newUser1});
+    res.status(200).json({message: 'Registration successful', user: newUser1});
 
     // res.status(200).json({message: 'Registration successful'});
   } catch (error) {
