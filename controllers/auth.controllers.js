@@ -10,13 +10,32 @@ const secretKey = process.env.JWT_SECRET;
 
 export const register = async (req, res) => {
   try {
-    const {name, email, password} = req.body;
+    const { name, email, password } = req.body;
 
-    const existingUser = await User.findOne({email});
+    const existingUser = await User.findOne({ email });
+
     if (existingUser) {
-      return res.status(400).json({message: 'User already exists'});
+      if (!existingUser.verified) {
+        //  Resend OTP to unverified user
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = Date.now() + 5 * 60 * 1000;
+
+        existingUser.otp = otp;
+        existingUser.otpExpiry = otpExpiry;
+        existingUser.password = await bcrypt.hash(password, 10); // update password if re-registering
+        await existingUser.save();
+
+        await sendverificationemail(existingUser.email, existingUser.otp);
+
+        return res.status(200).json({
+          message: 'User already exists but is not verified. OTP resent.',
+        });
+      }
+
+      return res.status(400).json({ message: 'User already exists and is verified.' });
     }
 
+    //  New user registration
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = Date.now() + 5 * 60 * 1000;
 
@@ -28,25 +47,22 @@ export const register = async (req, res) => {
       otp,
       otpExpiry,
       verified: false,
+      verificationToken: crypto.randomBytes(20).toString('hex'),
     });
 
-    newUser.verificationToken = crypto.randomBytes(20).toString('hex');
-
     await newUser.save();
-
     await sendverificationemail(newUser.email, newUser.otp);
-     const user = await User.findOne({email});
-     const newUser1 = user.toObject({getters: true});
-    delete newUser1.password;
 
-    res.status(200).json({message: 'Registration successful', user: newUser1});
+    const user = newUser.toObject({ getters: true });
+    delete user.password;
 
-    // res.status(200).json({message: 'Registration successful'});
+    res.status(200).json({ message: 'Registration successful', user });
   } catch (error) {
     console.error('Error in register function:', error);
-    res.status(500).json({message: 'Internal server error'});
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 export const forgotpass = async (req, res) => {
   try {
