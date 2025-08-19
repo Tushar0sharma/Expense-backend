@@ -133,7 +133,7 @@ app.post('/api/save-fcm-token', async (req, res) => {
   scheduled: true,
   timezone: "Asia/Kolkata"
 })
-cron.schedule('*/15 * * * *', async () => {
+cron.schedule('* * * * *', async () => {
   console.log('⏰ Pinging backend every 15 minutes to keep it awake');
 
   try {
@@ -146,3 +146,4 @@ cron.schedule('*/15 * * * *', async () => {
   scheduled: true,
   timezone: "Asia/Kolkata"
 });
+
