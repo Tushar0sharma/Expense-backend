@@ -73,7 +73,7 @@ app.post('/api/save-fcm-token', async (req, res) => {
     }
   });
   
-  cron.schedule ('* * * * *',async()=>{
+  cron.schedule ('0 10 * * *',async()=>{
     console.log('⏰ Running scheduled job: 10 AM daily');
     try{
       const users = await User.find({ fcmToken: { $ne: null } });
@@ -133,7 +133,7 @@ app.post('/api/save-fcm-token', async (req, res) => {
   scheduled: true,
   timezone: "Asia/Kolkata"
 })
-cron.schedule('* * * * *', async () => {
+cron.schedule('*/15 * * * *', async () => {
   console.log('⏰ Pinging backend every 15 minutes to keep it awake');
 
   try {
@@ -146,5 +146,6 @@ cron.schedule('* * * * *', async () => {
   scheduled: true,
   timezone: "Asia/Kolkata"
 });
+
 
 
