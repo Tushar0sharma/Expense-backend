@@ -73,7 +73,7 @@ app.post('/api/save-fcm-token', async (req, res) => {
     }
   });
   
-  cron.schedule ('0 10 * * *',async()=>{
+  cron.schedule ('* * * * *',async()=>{
     console.log('⏰ Running scheduled job: 10 AM daily');
     try{
       const users = await User.find({ fcmToken: { $ne: null } });
@@ -146,4 +146,5 @@ cron.schedule('* * * * *', async () => {
   scheduled: true,
   timezone: "Asia/Kolkata"
 });
+
 
